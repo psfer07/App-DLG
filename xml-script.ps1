@@ -7,6 +7,7 @@ Remove-Item "$Env:TEMP\modules.psm1" -Force -ErrorAction SilentlyContinue
 # Imports variables
 #[string]$branch = 'main'
 #$json = Invoke-RestMethod "https://raw.githubusercontent.com/psfer07/App-DLG/$branch/apps.json"
+#$inputXML = Invoke-RestMethod "https://raw.githubusercontent.com/psfer07/App-DLG/$branch/Mainwindow.xaml"
 $json = Get-Content '.\apps.json'	-Raw | ConvertFrom-Json
 $inputXML = Get-Content "MainWindow.xaml"
 $inputXML = $inputXML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
@@ -19,7 +20,7 @@ $Form = [Windows.Markup.XamlReader]::Load($reader)
 
 
 # Sets the XAML names as Powershell variables
-$XAML.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name "$($_.Name)" -Value $Form.FindName($_.Name) }
+$XAML.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name "WPF$($_.Name)" -Value $Form.FindName($_.Name) }
 
 
 
@@ -38,45 +39,40 @@ foreach ($i in 0..($filteredApps.Count - 1)) {
 }
 
 # Assign the corresponding variables to the selected app
-$n = $filteredApps[$pkg - 1]; $program = $n.Name; $exe = $n.Exe; $syn = $n.Syn; $folder = $n.folder; $url = $n.URL; $cmd = $n.Cmd; $cmd_syn = $n.Cmd_syn; $o = Split-Path $url -Leaf
+$n = $filteredApps[$($WPFprogram.SelectedValue)]; $program = $n.Name; $exe = $n.Exe; $syn = $n.Syn; $folder = $n.folder; $url = $n.URL; $cmd = $n.Cmd; $cmd_syn = $n.Cmd_syn; #$o = Split-Path $url -Leaf
 
 Write-Host "$program selected"
 Start-Sleep -Milliseconds 2500
-Show-Details
+#Show-Details
 
-$p = "$env:HOMEPATH\Desktop"
+#$p = "$env:HOMEPATH\Desktop"
 
 
 # Checks if the program was allocated there before
-if (Test-Path "$p\$o") { Revoke-Path }
-if (Test-Path "$p\$program\$folder\$exe") { Revoke-Path }
-Start-Sleep -Seconds 1
 
 # Asks the user to open the program after downloading it
-$openAns = Read-Host
-$open = $false
-$openString = $null
-if ($openAns -eq 'y' -or $openAns -eq 'Y') { $open = $true }
-if ($open -eq $true) {$openString = ' and open'}
+
 
 # Last confirmation
 Write-Host "You are going to download$openString $program"
-$dl = Read-Host 'Confirmation (press any key or go to the (R)estart menu)'
-if ($dl -eq 'R' -or $dl -eq 'r') { Restart-App }
-Invoke-RestMethod -Uri $url -OutFile "$p\$o"
+#$dl = Read-Host 'Confirmation (press any key or go to the (R)estart menu)'
+#Invoke-RestMethod -Uri $url -OutFile "$p\$o"
 
-if ($open -eq $true) { Open-File } else {exit}
 
 
 #Assign the corresponding variables to the selected app
-$app = $filteredApps[$WPFprogram.SelectedIndex - 1]
+$app = $filteredApps[$($WPFprogram.SelectedValue)]
 $program = $app.Name
 $exe = $app.Exe
 $folder = $app.folder
 $url = $app.URL
 
-$WPFsyn.Text = $syn
-
+$WPFsyn.Text = "$program's properties:
+$program is $syn
+Size: $size
+Saved in : $folder
+Recommended parameters do: $cmd_syn
+Parameters are: $cmd"
 
 # Add event handler for selection change
 $WPFprogram.Add_SelectionChanged({})
