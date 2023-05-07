@@ -15,15 +15,11 @@ $inputXML = $inputXML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -repla
 [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
 [xml]$XAML = $inputXML
 $reader = (New-Object System.Xml.XmlNodeReader $XAML)
-try {
-  $Form = [Windows.Markup.XamlReader]::Load($reader)
-}
-catch {
-  Write-Host "Unable to load Windows.Markup.XamlReader. Double-check syntax and ensure .net is installed."
-}
+$Form = [Windows.Markup.XamlReader]::Load($reader)
+
 
 # Sets the XAML names as Powershell variables
-$XAML.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name "WPF$($_.Name)" -Value $Form.FindName($_.Name) }
+$XAML.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name "$($_.Name)" -Value $Form.FindName($_.Name) }
 
 
 
@@ -44,7 +40,7 @@ foreach ($i in 0..($filteredApps.Count - 1)) {
 # Assign the corresponding variables to the selected app
 $n = $filteredApps[$pkg - 1]; $program = $n.Name; $exe = $n.Exe; $syn = $n.Syn; $folder = $n.folder; $url = $n.URL; $cmd = $n.Cmd; $cmd_syn = $n.Cmd_syn; $o = Split-Path $url -Leaf
 
-Write-Main "$program selected"
+Write-Host "$program selected"
 Start-Sleep -Milliseconds 2500
 Show-Details
 
@@ -57,7 +53,6 @@ if (Test-Path "$p\$program\$folder\$exe") { Revoke-Path }
 Start-Sleep -Seconds 1
 
 # Asks the user to open the program after downloading it
-Write-Secondary "Do you want to open it when finished? (y/n)"
 $openAns = Read-Host
 $open = $false
 $openString = $null
@@ -65,7 +60,7 @@ if ($openAns -eq 'y' -or $openAns -eq 'Y') { $open = $true }
 if ($open -eq $true) {$openString = ' and open'}
 
 # Last confirmation
-Write-Main "You are going to download$openString $program"
+Write-Host "You are going to download$openString $program"
 $dl = Read-Host 'Confirmation (press any key or go to the (R)estart menu)'
 if ($dl -eq 'R' -or $dl -eq 'r') { Restart-App }
 Invoke-RestMethod -Uri $url -OutFile "$p\$o"
