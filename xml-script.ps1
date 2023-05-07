@@ -51,7 +51,7 @@ Start-Sleep -Milliseconds 2500
 # Checks if the program was allocated there before
 
 # Asks the user to open the program after downloading it
-
+$open = $false
 
 # Last confirmation
 Write-Host "You are going to download$openString $program"
@@ -67,6 +67,11 @@ $exe = $app.Exe
 $folder = $app.folder
 $url = $app.URL
 
+if ($size -gt 1GB) { [string]::Format("{0:0.00} GB", $size / 1GB) }
+elseIf ($size -gt 1MB) { [string]::Format("{0:0.00} MB", $size / 1MB) }
+elseIf ($size -gt 1KB) { [string]::Format("{0:0.00} kB", $size / 1KB) }
+elseIf ($size -gt 0) { [string]::Format("{0:0.00} B", $size) }
+
 $WPFsyn.Text = "$program's properties:
 $program is $syn
 Size: $size
@@ -76,6 +81,8 @@ Parameters are: $cmd"
 
 # Add event handler for selection change
 $WPFprogram.Add_SelectionChanged({})
+
+if ($WPFopen.IsChecked){$open = $true}
 
 $WPFdownload.Add_Click({
     Write-Host $exe
