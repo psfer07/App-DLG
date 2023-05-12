@@ -1,24 +1,16 @@
-# Declare functions
-function Get-AppSize {
-  param[([int]$length)]
-  $request = Invoke-WebRequest $url -Method Head
-  $length = [int]$request.Headers['Content-Length']
-if ($length -gt 1GB) { [string]::Format("{0:0.00} GB", $length / 1GB) }
-elseIf ($length -gt 1MB) { [string]::Format("{0:0.00} MB", $length / 1MB) }
-elseIf ($length -gt 1KB) { [string]::Format("{0:0.00} kB", $length / 1KB) }
-elseIf ($length -gt 0) { [string]::Format("{0:0.00} B", $length) }
-}
-
 # Bypasses any execution policy
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 
 # Removes last possible modules.psm1 from the computer
-Remove-Item "$Env:TEMP\modules.psm1" -Force -ErrorAction SilentlyContinue
+# Remove-Item "$Env:TEMP\modules.psm1" -Force -ErrorAction SilentlyContinue
 
 # Imports variables
-#[string]$branch = 'main'
-#$json = Invoke-RestMethod "https://raw.githubusercontent.com/psfer07/App-DLG/$branch/apps.json"
-#$inputXML = Invoke-RestMethod "https://raw.githubusercontent.com/psfer07/App-DLG/$branch/Mainwindow.xaml"
+# [string]$branch = 'dev'
+# $json = Invoke-RestMethod "https://raw.githubusercontent.com/psfer07/App-DLG/$branch/apps.json"
+# $inputXML = Invoke-RestMethod "https://raw.githubusercontent.com/psfer07/App-DLG/$branch/Mainwindow.xaml"
+# [string]$module = "$Env:TEMP\modules.psm1"
+# Invoke-WebRequest -Uri "https://raw.githubusercontent.com/psfer07/App-DL/$branch/modules.psm1" -OutFile $module
+# Import-Module $module -DisableNameChecking
 $json = Get-Content '.\apps.json'	-Raw | ConvertFrom-Json
 $inputXML = Get-Content "MainWindow.xaml"
 $inputXML = $inputXML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
@@ -56,8 +48,6 @@ Write-Host "$program selected"
 Start-Sleep -Milliseconds 2500
 #Show-Details
 
-#$p = "$env:HOMEPATH\Desktop"
-
 
 # Checks if the program was allocated there before
 
@@ -69,6 +59,9 @@ Write-Host "You are going to download$openString $program"
 #$dl = Read-Host 'Confirmation (press any key or go to the (R)estart menu)'
 #Invoke-RestMethod -Uri $url -OutFile "$p\$o"
 
+$request = Invoke-WebRequest $url -Method Head
+$length = [int]$request.Headers['Content-Length']
+$size = Read-FileSize $length
 $WPFsyn.Text = "It is $syn
 Size: $size
 Saved in : $folder
