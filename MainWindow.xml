@@ -17,7 +17,7 @@
             <RadioButton x:Name="cg6" Content="Category #6" HorizontalAlignment="Left" Margin="356,164,0,0" VerticalAlignment="Top" FontFamily="Segoe UI Semibold" FontSize="14" Foreground="White"/>
             <Label Content="Select a following app to download:" HorizontalAlignment="Left" Height="29" Margin="518,119,0,0" VerticalAlignment="Top" Width="214" FontFamily="Segoe UI Semibold" Foreground="White"/>
             <ComboBox x:Name="program" HorizontalAlignment="Left" Margin="550,160,0,0" VerticalAlignment="Top" Width="150"/>
-            <TextBlock x:Name="syn" HorizontalAlignment="Left" Margin="504,238,0,0" TextWrapping="Wrap" Text="Select an app to see what is it about" VerticalAlignment="Top" Height="80" Width="242" Foreground="White" TextAlignment="Center" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+            <TextBlock x:Name="syn" HorizontalAlignment="Left" Margin="344,238,0,0" TextWrapping="Wrap" Text="Select an app to see what is it about" VerticalAlignment="Top" Height="100" Width="400" Foreground="White" TextAlignment="Center" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
             <Label Content="Optional features" HorizontalAlignment="Left" Height="28" Margin="36,231,0,0" VerticalAlignment="Top" Width="174" FontFamily="Segoe UI Semibold" FontSize="14" Foreground="White"/>
             <Border BorderBrush="White" BorderThickness="50" HorizontalAlignment="Left" Height="1" Margin="38,255,0,0" VerticalAlignment="Top" Width="116"/>
             <CheckBox x:Name="portable" Content="Select the portable version" HorizontalAlignment="Left" Margin="36,270,0,0" VerticalAlignment="Top" Foreground="White"/>
