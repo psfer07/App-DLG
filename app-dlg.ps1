@@ -1,9 +1,16 @@
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+function Show-Apps($button) {
+    $WPFprogram.IsEnabled, $WPFusecmd.IsEnabled, $WPFlaunch.IsEnabled, $WPFopen.IsEnabled, $WPFportable.IsEnabled = $false
+    $WPFprogram.IsEnabled = $true
+    $WPFprogram.Items.Clear()
+    $json.($button.Content).PSObject.Properties.Name | ForEach-Object { $WPFprogram.Items.Add($_) }
+}
 
+try {
 # Import and convert data
 $wc = New-Object System.Net.WebClient
 $branch = 'dev'
-$tempFolder = Join-Path $Env:TEMP 'AppDL'
+$tempFolder = Join-Path $Env:TEMP 'App-DLG'
 $assets = Join-Path $tempFolder 'assets'
 if (!(Test-Path $assets -PathType Container)) { New-Item -ItemType Directory -Path $assets -Force | Out-Null }
 $wc.DownloadFile("https://raw.githubusercontent.com/psfer07/App-DLG/$branch/apps.json", "$assets\apps.json")
@@ -30,7 +37,7 @@ $xml = @'
             <RadioButton x:Name="cg6" Content="Category #6" HorizontalAlignment="Left" Margin="356,164,0,0" VerticalAlignment="Top" FontFamily="Segoe UI Semibold" FontSize="14" Foreground="White" GroupName="category" Cursor="Hand"/>
             <Label Content="Select a following app to download:" HorizontalAlignment="Left" Height="30" Margin="26,220,0,0" VerticalAlignment="Top" Width="214" FontFamily="Segoe UI Semibold" Foreground="White"/>
             <ComboBox x:Name="program" HorizontalAlignment="Left" Margin="58,255,0,0" VerticalAlignment="Top" Width="150" Cursor="Hand"/>
-            <TextBlock x:Name="syn" HorizontalAlignment="Left" Margin="249,220,0,0" TextWrapping="Wrap" Text="Select an app to see what is it about" VerticalAlignment="Top" Height="80" Width="282" Foreground="White" TextAlignment="Center"/>
+            <TextBlock x:Name="syn" HorizontalAlignment="Left" Margin="249,220,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="80" Width="282" Foreground="White" TextAlignment="Center"/>
             <Border BorderBrush="White" BorderThickness="1" HorizontalAlignment="Left" Height="260" Margin="556,105,0,0" VerticalAlignment="Top" Width="194" Grid.ColumnSpan="2"/>
             <Label Content="     Select a folder&#xD;&#xA;to save the program" HorizontalAlignment="Left" Margin="556,109,0,0" VerticalAlignment="Top" Foreground="White" FontWeight="Bold" FontSize="14" Width="194" HorizontalContentAlignment="Center" Grid.ColumnSpan="2"/>
             <Border BorderBrush="White" BorderThickness="3" HorizontalAlignment="Left" Height="2" Margin="602,134,0,0" VerticalAlignment="Top" Width="102" Grid.ColumnSpan="2"/>
@@ -42,7 +49,7 @@ $xml = @'
             <RadioButton x:Name="p5" Content="Program Files" HorizontalAlignment="Left" Margin="570,245,0,0" VerticalAlignment="Top" FontFamily="Segoe UI Semibold" FontSize="12" Foreground="White" GroupName="path" Cursor="Hand"/>
             <RadioButton x:Name="p6" Content="User profile" HorizontalAlignment="Left" Margin="570,265,0,0" VerticalAlignment="Top" FontFamily="Segoe UI Semibold" FontSize="12" Foreground="White" GroupName="path" Cursor="Hand"/>
             <RadioButton x:Name="p7" Content="App-DLG temporal folder" HorizontalAlignment="Left" Margin="570,285,0,0" VerticalAlignment="Top" FontFamily="Segoe UI Semibold" FontSize="12" Foreground="White" GroupName="path" Cursor="Hand"/>
-            <Button x:Name="searchForPath" Content="Save in a custom folder" HorizontalAlignment="Left" Margin="588,310,0,0" VerticalAlignment="Top" Width="131" Cursor="Hand"/>
+            <Button x:Name="saveFile" Content="Save in a custom folder" HorizontalAlignment="Left" Margin="588,310,0,0" VerticalAlignment="Top" Width="131" Cursor="Hand"/>
             <TextBox x:Name="path" HorizontalAlignment="Left" Margin="556,345,0,0" VerticalAlignment="Top" Width="194" Height="20" FontSize="10" Cursor="IBeam"/>
             <Label Content="Optional features" HorizontalAlignment="Left" Height="28" Margin="29,303,0,0" VerticalAlignment="Top" Width="174" FontSize="14" Foreground="White" FontWeight="Bold"/>
             <Border BorderBrush="White" BorderThickness="3" HorizontalAlignment="Left" Height="2" Margin="33,328,0,0" VerticalAlignment="Top" Width="116"/>
@@ -73,51 +80,59 @@ foreach ($category in $json.PSObject.Properties.Name) {
 }
 
 # App selection
-$WPFprogram.IsEnabled, $WPFusecmd.IsEnabled, $WPFlaunch.IsEnabled, $WPFopen.IsEnabled, $WPFportable.IsEnabled = $false
-
-$WPFcg1.Add_Click({
-        $WPFprogram.IsEnabled = $true
-        $WPFprogram.Items.Clear()
-        $json.$($WPFcg1.Content).PSObject.Properties.Name | ForEach-Object { $WPFprogram.Items.Add($_) }
-    })
-$WPFcg2.Add_Click({
-        $WPFprogram.IsEnabled = $true
-        $WPFprogram.Items.Clear()
-        $json.$($WPFcg2.Content).PSObject.Properties.Name | ForEach-Object { $WPFprogram.Items.Add($_) }
-    })
-$WPFcg3.Add_Click({
-        $WPFprogram.IsEnabled = $true
-        $WPFprogram.Items.Clear()
-        $json.$($WPFcg3.Content).PSObject.Properties.Name | ForEach-Object { $WPFprogram.Items.Add($_) }
-    })
-$WPFcg4.Add_Click({
-        $WPFprogram.IsEnabled = $true
-        $WPFprogram.Items.Clear()
-        $json.$($WPFcg4.Content).PSObject.Properties.Name | ForEach-Object { $WPFprogram.Items.Add($_) }
-    })
-$WPFcg5.Add_Click({
-        $WPFprogram.IsEnabled = $true
-        $WPFprogram.Items.Clear()
-        $json.$($WPFcg5.Content).PSObject.Properties.Name | ForEach-Object { $WPFprogram.Items.Add($_) }
-    })
-$WPFcg6.Add_Click({
-        $WPFprogram.IsEnabled = $true
-        $WPFprogram.Items.Clear()
-        $json.$($WPFcg6.Content).PSObject.Properties.Name | ForEach-Object { $WPFprogram.Items.Add($_) }
-    })
+$WPFcg1.Add_Click({ Show-Apps $WPFcg1 })
+$WPFcg2.Add_Click({ Show-Apps $WPFcg2 })
+$WPFcg3.Add_Click({ Show-Apps $WPFcg3 })
+$WPFcg4.Add_Click({ Show-Apps $WPFcg4 })
+$WPFcg5.Add_Click({ Show-Apps $WPFcg5 })
+$WPFcg6.Add_Click({ Show-Apps $WPFcg6 })
+    
     
 $WPFprogram.Add_SelectionChanged({
         $name = $WPFprogram.SelectedItem
         $appCategory = $json.PSobject.Properties | Where-Object { $_.Value.PSObject.Properties.Name -ieq $name } | Select-Object -ExpandProperty Name
-        $app = $json.$appCategory.$name
-        $versions = $app.versions
-        if ($versions -eq 'PI') { $WPFusecmd.IsEnabled, $WPFlaunch.IsEnabled, $WPFopen.IsEnabled, $WPFportable.IsEnabled = $true, $true, $true, $true }
+        $appProperties = $json.$appCategory.$name
+        $properties = 'versions', 'details', 'size', 'syn', 'cmd_syn'
+        foreach ($property in $properties) {
+            if ($appProperties.$property -is [array]) { $value = $appProperties.$property[$ver] } else { $value = $appProperties.$property }
+            if ($property -eq 'details' -and ($ver -eq 0 -or $ver -eq 1)) { $value = $value.Substring($ver, 1) }
+            New-Variable -Name $property -Value $value -ErrorAction SilentlyContinue
+        }
+        $WPFusecmd.IsChecked, $WPFlaunch.IsChecked, $WPFopen.IsChecked, $WPFportable.IsChecked = $false, $false, $false, $false
+        $WPFsyn.Text = @"
+        $name is $syn
+        Size: $size
+
+"@
+        if ($null -eq $WPFprogram.SelectedItem) { $WPFsyn.Text = "Select an app to see what is it about" }
+        if ($versions -eq 'PI') { $WPFusecmd.IsEnabled, $WPFlaunch.IsEnabled, $WPFopen.IsEnabled, $WPFportable.IsEnabled = $true }
         if ($versions -eq 'P') {
             $WPFportable.IsChecked = $true
             $WPFopen.IsEnabled = $true
-            if ($app.details -eq '') { $WPFlaunch.IsEnabled = $true }
+            if ($app.details -contains 'i') { $WPFlaunch.IsEnabled = $true }
         }
 
     })
 
+if ($WPFportable.IsChecked) {
+    
+}
+
+# Path selection
+$WPFp1.Add_Click({ $WPFpath.Text = "$Env:USERPROFILE\Desktop" })
+$WPFp2.Add_Click({ $WPFpath.Text = "$Env:USERPROFILE\Documents" })
+$WPFp3.Add_Click({ $WPFpath.Text = "$Env:USERPROFILE\Downloads" })
+$WPFp4.Add_Click({ $WPFpath.Text = $Env:SystemDrive })
+$WPFp5.Add_Click({ $WPFpath.Text = $Env:ProgramFiles })
+$WPFp6.Add_Click({ $WPFpath.Text = "$Env:SystemDrive$Env:HOMEPATH" })
+$WPFp7.Add_Click({ $WPFpath.Text = "$tempFolder\Downloads" })
+$WPFsaveFile.Add_Click({
+        $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
+        $folderBrowser.Description = "Select a folder or create a new one to save the package"
+        $folderBrowser.ShowDialog()
+        $WPFpath.Text = $folderBrowser.SelectedPath
+    })
+
 $form.ShowDialog() | Out-Null
+}
+finally { Remove-Item "$Env:TEMP\App-DLG" -Recurse -Force | Out-Null }
