@@ -37,7 +37,7 @@ $xml = @'
             <RadioButton x:Name="cg6" Content="Category #6" HorizontalAlignment="Left" Margin="356,164,0,0" VerticalAlignment="Top" FontFamily="Segoe UI Semibold" FontSize="14" Foreground="White" GroupName="category" Cursor="Hand"/>
             <Label Content="Select a following app to download:" HorizontalAlignment="Left" Height="30" Margin="26,220,0,0" VerticalAlignment="Top" Width="214" FontFamily="Segoe UI Semibold" Foreground="White"/>
             <ComboBox x:Name="program" HorizontalAlignment="Left" Margin="58,255,0,0" VerticalAlignment="Top" Width="150" Cursor="Hand"/>
-            <TextBlock x:Name="syn" HorizontalAlignment="Left" Margin="249,220,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="80" Width="282" Foreground="White" TextAlignment="Center"/>
+            <TextBlock x:Name="syn" HorizontalAlignment="Left" Margin="249,226,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="80" Width="282" Foreground="White" TextAlignment="Center"/>
             <Border BorderBrush="White" BorderThickness="1" HorizontalAlignment="Left" Height="260" Margin="556,105,0,0" VerticalAlignment="Top" Width="194" Grid.ColumnSpan="2"/>
             <Label Content="     Select a folder&#xD;&#xA;to save the program" HorizontalAlignment="Left" Margin="556,109,0,0" VerticalAlignment="Top" Foreground="White" FontWeight="Bold" FontSize="14" Width="194" HorizontalContentAlignment="Center" Grid.ColumnSpan="2"/>
             <Border BorderBrush="White" BorderThickness="3" HorizontalAlignment="Left" Height="2" Margin="602,134,0,0" VerticalAlignment="Top" Width="102" Grid.ColumnSpan="2"/>
