@@ -139,7 +139,7 @@ try {
             
             $saveFile = New-Object System.Windows.Forms.SaveFileDialog
             # $saveFile.Description = "Select a folder or create a new one to save the package"
-            
+            $saveFile.Title = "Save file in..."
             if ($null -eq $ext) { $saveFile.Filter = "All files | *.*" } else { $saveFile.Filter = "All $ext files | *.$ext" }
             
             $saveFile.FileName = $o
