@@ -5,18 +5,22 @@ function Show-Apps($button) {
     $WPFprogram.Items.Clear()
     $json.($button.Content).PSObject.Properties.Name | ForEach-Object { $WPFprogram.Items.Add($_) }
 }
+function Reset-Buttons() {
+    $WPFusecmd.IsEnabled, $WPFlaunch.IsEnabled, $WPFopen.IsEnabled, $WPFportable.IsEnabled = $true
+    $WPFusecmd.IsChecked, $WPFlaunch.IsChecked, $WPFopen.IsChecked, $WPFportable.IsChecked = $false
+}
 
 try {
-# Import and convert data
-$wc = New-Object System.Net.WebClient
-$branch = 'dev'
-$tempFolder = Join-Path $Env:TEMP 'App-DLG'
-$assets = Join-Path $tempFolder 'assets'
-if (!(Test-Path $assets -PathType Container)) { New-Item -ItemType Directory -Path $assets -Force | Out-Null }
-$wc.DownloadFile("https://raw.githubusercontent.com/psfer07/App-DLG/$branch/apps.json", "$assets\apps.json")
-$json = Get-Content "$assets\apps.json" <# '.\apps.json' #> -Raw | ConvertFrom-Json
-Add-Type -AssemblyName System.Windows.Forms
-$xml = @'
+    # Import and convert data
+    $wc = New-Object System.Net.WebClient
+    $branch = 'dev'
+    $tempFolder = Join-Path $Env:TEMP 'App-DLG'
+    $assets = Join-Path $tempFolder 'assets'
+    if (!(Test-Path $assets -PathType Container)) { New-Item -ItemType Directory -Path $assets -Force | Out-Null }
+    $wc.DownloadFile("https://raw.githubusercontent.com/psfer07/App-DLG/$branch/apps.json", "$assets\apps.json")
+    $json = Get-Content "$assets\apps.json" <# '.\apps.json' #> -Raw | ConvertFrom-Json
+    Add-Type -AssemblyName System.Windows.Forms
+    $xml = @'
 <Window  x:Class="App_DLG.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -66,73 +70,83 @@ $xml = @'
 </Window>
 
 '@  
-[xml]$XAML = $xml -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
-[void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
-$form = [Windows.Markup.XamlReader]::Load((New-Object System.Xml.XmlNodeReader $XAML))
-$XAML.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name "WPF$($_.Name)" -Value $form.FindName($_.Name) }
+    [xml]$XAML = $xml -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
+    [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
+    $form = [Windows.Markup.XamlReader]::Load((New-Object System.Xml.XmlNodeReader $XAML))
+    $XAML.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name "WPF$($_.Name)" -Value $form.FindName($_.Name) }
 
-# Category assignment
-$i = 1
-foreach ($category in $json.PSObject.Properties.Name) {
-    $cgs = Get-Variable -Name WPFcg$i -ValueOnly
-    $cgs.Content = $category
-    $i++
-}
+    # Category assignment
+    $i = 1
+    foreach ($category in $json.PSObject.Properties.Name) {
+        $cgs = Get-Variable -Name WPFcg$i -ValueOnly
+        $cgs.Content = $category
+        $i++
+    }
 
-# App selection
-$WPFcg1.Add_Click({ Show-Apps $WPFcg1 })
-$WPFcg2.Add_Click({ Show-Apps $WPFcg2 })
-$WPFcg3.Add_Click({ Show-Apps $WPFcg3 })
-$WPFcg4.Add_Click({ Show-Apps $WPFcg4 })
-$WPFcg5.Add_Click({ Show-Apps $WPFcg5 })
-$WPFcg6.Add_Click({ Show-Apps $WPFcg6 })
+    # App selection
+    $WPFcg1.Add_Click({ Show-Apps $WPFcg1 })
+    $WPFcg2.Add_Click({ Show-Apps $WPFcg2 })
+    $WPFcg3.Add_Click({ Show-Apps $WPFcg3 })
+    $WPFcg4.Add_Click({ Show-Apps $WPFcg4 })
+    $WPFcg5.Add_Click({ Show-Apps $WPFcg5 })
+    $WPFcg6.Add_Click({ Show-Apps $WPFcg6 })
     
     
-$WPFprogram.Add_SelectionChanged({
-        $name = $WPFprogram.SelectedItem
-        $appCategory = $json.PSobject.Properties | Where-Object { $_.Value.PSObject.Properties.Name -ieq $name } | Select-Object -ExpandProperty Name
-        $appProperties = $json.$appCategory.$name
-        $properties = 'versions', 'details', 'size', 'syn', 'cmd_syn'
-        foreach ($property in $properties) {
-            if ($appProperties.$property -is [array]) { $value = $appProperties.$property[$ver] } else { $value = $appProperties.$property }
-            if ($property -eq 'details' -and ($ver -eq 0 -or $ver -eq 1)) { $value = $value.Substring($ver, 1) }
-            New-Variable -Name $property -Value $value -ErrorAction SilentlyContinue
-        }
-        $WPFusecmd.IsChecked, $WPFlaunch.IsChecked, $WPFopen.IsChecked, $WPFportable.IsChecked = $false, $false, $false, $false
-        $WPFsyn.Text = @"
+    $WPFprogram.Add_SelectionChanged({
+            $name = $WPFprogram.SelectedItem
+            $appCategory = $json.PSobject.Properties | Where-Object { $_.Value.PSObject.Properties.Name -ieq $name } | Select-Object -ExpandProperty Name
+            $appProperties = $json.$appCategory.$name
+            $properties = 'versions', 'details', 'size', 'syn', 'cmd_syn'
+            foreach ($property in $properties) {
+                if ($appProperties.$property -is [array]) { $value = $appProperties.$property[$ver] } else { $value = $appProperties.$property }
+                if ($property -eq 'details' -and ($ver -eq 0 -or $ver -eq 1)) { $value = $value.Substring($ver, 1) }
+                New-Variable -Name $property -Value $value -ErrorAction SilentlyContinue
+            }
+            Reset-Buttons
+            $WPFsyn.Text = @"
         $name is $syn
-        Size: $size
+    Size: $size
 
 "@
-        if ($null -eq $WPFprogram.SelectedItem) { $WPFsyn.Text = "Select an app to see what is it about" }
-        if ($versions -eq 'PI') { $WPFusecmd.IsEnabled, $WPFlaunch.IsEnabled, $WPFopen.IsEnabled, $WPFportable.IsEnabled = $true }
-        if ($versions -eq 'P') {
-            $WPFportable.IsChecked = $true
-            $WPFopen.IsEnabled = $true
-            if ($app.details -contains 'i') { $WPFlaunch.IsEnabled = $true }
-        }
+            if ($null -eq $WPFprogram.SelectedItem) { $WPFsyn.Text = "Select an app to see what is it about" }
+            if ($versions -eq 'PI') { $WPFusecmd.IsEnabled, $WPFlaunch.IsEnabled, $WPFopen.IsEnabled, $WPFportable.IsEnabled = $true }
+            if ($versions -eq 'P') {
+                $WPFportable.IsChecked = $true
+                $WPFopen.IsEnabled = $true
+                if ($app.details -contains 'i') { $WPFlaunch.IsEnabled = $true }
+            }
 
-    })
+        })
 
-if ($WPFportable.IsChecked) {
+    if ($WPFportable.IsChecked) {
     
-}
+    }
 
-# Path selection
-$WPFp1.Add_Click({ $WPFpath.Text = "$Env:USERPROFILE\Desktop" })
-$WPFp2.Add_Click({ $WPFpath.Text = "$Env:USERPROFILE\Documents" })
-$WPFp3.Add_Click({ $WPFpath.Text = "$Env:USERPROFILE\Downloads" })
-$WPFp4.Add_Click({ $WPFpath.Text = $Env:SystemDrive })
-$WPFp5.Add_Click({ $WPFpath.Text = $Env:ProgramFiles })
-$WPFp6.Add_Click({ $WPFpath.Text = "$Env:SystemDrive$Env:HOMEPATH" })
-$WPFp7.Add_Click({ $WPFpath.Text = "$tempFolder\Downloads" })
-$WPFsaveFile.Add_Click({
-        $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
-        $folderBrowser.Description = "Select a folder or create a new one to save the package"
-        $folderBrowser.ShowDialog()
-        $WPFpath.Text = $folderBrowser.SelectedPath
-    })
+    # Path selection
+    $WPFp1.Add_Click({ $WPFpath.Text = "$Env:USERPROFILE\Desktop" })
+    $WPFp2.Add_Click({ $WPFpath.Text = "$Env:USERPROFILE\Documents" })
+    $WPFp3.Add_Click({ $WPFpath.Text = "$Env:USERPROFILE\Downloads" })
+    $WPFp4.Add_Click({ $WPFpath.Text = $Env:SystemDrive })
+    $WPFp5.Add_Click({ $WPFpath.Text = $Env:ProgramFiles })
+    $WPFp6.Add_Click({ $WPFpath.Text = "$Env:SystemDrive$Env:HOMEPATH" })
+    $WPFp7.Add_Click({ $WPFpath.Text = "$tempFolder\Downloads" })
+    $WPFsaveFile.Add_Click({
+            $name = $WPFprogram.SelectedItem
+            $appCategory = $json.PSobject.Properties | Where-Object { $_.Value.PSObject.Properties.Name -ieq $name } | Select-Object -ExpandProperty Name
+            $url = $json.$appCategory.$name.url
+            $o = $url | Split-Path -Leaf
+            if ($null -ne $WPFprogram.SelectedItem) { $ext = [System.IO.Path]::GetExtension($url).TrimStart('.') } else { $ext = $null }
+            
+            $saveFile = New-Object System.Windows.Forms.SaveFileDialog
+            # $saveFile.Description = "Select a folder or create a new one to save the package"
+            
+            if ($null -eq $ext) { $saveFile.Filter = "All files | *.*" } else { $saveFile.Filter = "All $ext files | *.$ext" }
+            
+            $saveFile.FileName = $o
+            $result = $saveFile.ShowDialog()
+            if ($result -eq 1) { $WPFpath.text = [System.IO.Path]::GetDirectoryName($saveFile.FileName) }
+        })
 
-$form.ShowDialog() | Out-Null
+    $form.ShowDialog() | Out-Null
 }
 finally { Remove-Item "$Env:TEMP\App-DLG" -Recurse -Force | Out-Null }
